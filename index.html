@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f1115">
+<title>Master Admin</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--panel2:#1e222b;--line:#272c37;--txt:#e9ebf1;--mut:#8d95a6;--acc:#2f80ed;--ok:#2fbf71;--bad:#ef5350;--warn:#f5a623;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px 0}
+.top{display:flex;align-items:baseline;justify-content:space-between}
+.top b{font-size:1.05rem;letter-spacing:.2px}
+.muted{color:var(--mut)}
+.pills{display:flex;gap:8px;margin:10px 0 8px}
+.pill{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:999px;padding:9px 6px;font-weight:600;font-size:.92rem;cursor:pointer}
+.pill.on{background:var(--c);border-color:var(--c);color:#fff}
+nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);padding:10px 12px;font-size:.9rem;white-space:nowrap;cursor:pointer}
+nav button.on{color:var(--txt);border-color:var(--acc)}
+main{max-width:760px;margin:0 auto;padding:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 6px;font-size:1rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;color:var(--txt);cursor:pointer;font:inherit}
+.item:active{background:var(--panel2)}
+.item .t{font-weight:600}
+.item .s{color:var(--mut);font-size:.85rem;margin-top:2px}
+.badge{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mut);white-space:nowrap}
+.badge.ok{color:var(--ok);border-color:rgba(47,191,113,.4)}
+.badge.bad{color:var(--bad);border-color:rgba(239,83,80,.5)}
+.badge.warn{color:var(--warn);border-color:rgba(245,166,35,.5)}
+label{display:block;font-size:.82rem;color:var(--mut);margin:12px 0 0}
+input,textarea,select{width:100%;margin-top:5px;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}
+textarea{resize:vertical;min-height:90px}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--acc);outline-offset:-1px}
+label.chk{display:flex;align-items:center;gap:10px;color:var(--txt);font-size:.95rem}
+label.chk input{width:auto;margin:0}
+button.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:600;font-size:.95rem;cursor:pointer}
+button.btn.s{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+button.btn.d{background:transparent;color:var(--bad);border:1px solid rgba(239,83,80,.5)}
+button.btn:disabled{opacity:.5}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+a.btn{display:inline-block;text-decoration:none;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-weight:600;font-size:.88rem}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:760px;max-height:92vh;overflow:auto;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet h2{margin:0 0 4px;font-size:1.1rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222833;border:1px solid var(--line);color:var(--txt);padding:11px 16px;border-radius:12px;z-index:40;max-width:92vw;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.bad{background:#3a1d1d;border-color:var(--bad)}
+.note{font-size:.82rem;color:var(--mut);margin:8px 0 0}
+.counter{font-size:.78rem;color:var(--mut);text-align:right;margin-top:3px}
+.counter.over{color:var(--bad)}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.srch{margin:0 0 10px}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+pre.out{white-space:pre-wrap;font-size:.78rem;color:var(--mut);margin:8px 0 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid .item{margin:0;align-items:center}
+.old-bg{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column}
+.old-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top));border-bottom:1px solid var(--line);background:var(--panel)}
+.old-bar b{flex:1;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.old-bar button,.old-bar a{font-size:.82rem;padding:8px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);text-decoration:none;cursor:pointer;font-weight:600;white-space:nowrap}
+.old-bg iframe{flex:1;width:100%;border:0;background:#fff}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+'use strict';
+
+/* ======================================================================
+   Master Admin: satu panel untuk Geely, XPeng, dan BYD.
+   Tanpa server. Data diubah langsung di repo GitHub masing-masing lewat
+   token milik Anda, yang hanya tersimpan di browser ini.
+   ====================================================================== */
+
+var SITES = {
+  geely: {
+    label: 'Geely', color: '#2f80ed', owner: 'geelywins', repo: 'geely-website', branch: 'main',
+    live: 'https://geelywins.com', admin: 'https://geelywins.com/admin/',
+    models: { path: 'src/data/models.json', name: 'nama', sub: 'tipe', tag: 'ringkas', price: 'string' },
+    articles: { kind: 'md', dir: 'src/content/artikel', statusKey: 'draft', descMax: 200, canCreate: true },
+    promo: { path: 'src/data/promo.json' },
+    deep: { model: 'model', article: 'artikel', promo: 'promo' },
+    links: [['artikel', 'Artikel (gambar, video, SEO, posting sosmed)'], ['model', 'Model Mobil (foto, galeri, 3D)'], ['promo', 'Promo (foto, promo baru)'], ['lp', 'Landing Page'], ['slider', 'Slider Beranda'], ['delivery', 'Delivery'], ['testimoni', 'Testimoni'], ['halaman', 'Isi Halaman'], ['topik', 'Rencana Topik'], ['laporan', 'Laporan'], ['unggah', 'Upload ZIP'], ['setelan', 'Pengaturan Website']]
+  },
+  xpeng: {
+    label: 'XPeng', color: '#12a594', owner: 'xpengwins', repo: 'xpeng-site', branch: 'main',
+    live: 'https://xpengwins.com', admin: 'https://xpengwins.com/admin/',
+    models: { path: 'data/models.json', name: 'name', sub: 'type', tag: 'tagline', price: 'variants' },
+    articles: { kind: 'json', path: 'data/articles.json', statusKey: 'status', canCreate: true },
+    deep: { model: 'models', article: 'articles' },
+    links: [['articles', 'Artikel (editor lengkap + skor SEO)'], ['models', 'Model (foto, warna, spesifikasi, FAQ)'], ['prices', 'Pricelist'], ['leasing', 'Leasing'], ['about', 'Tentang & lokasi'], ['seo', 'Skor SEO'], ['ranking', 'Ranking Google'], ['keywords', 'Keyword'], ['backlinks', 'Backlink'], ['media', 'Media & Zip'], ['backup', 'Backup'], ['settings', 'Pengaturan']]
+  },
+  byd: {
+    label: 'BYD', color: '#d6293e', owner: 'bydjkt-web', repo: 'bydjkt-web.github.io', branch: 'main',
+    live: 'https://bydjkt-web.github.io/win-byd-website/', admin: 'https://bydjkt-web.github.io/win-byd-website/admin/',
+    models: { path: 'content/models.json', name: 'name', sub: 'type', tag: 'tagline', price: 'variants' },
+    articles: { kind: 'md', dir: 'content/articles', statusKey: 'status', canCreate: false },
+    deep: { model: 'model/{slug}', article: 'artikel/{slug}' },
+    links: [['dashboard', 'Dashboard'], ['artikel', 'Artikel'], ['halaman', 'Halaman Pilar'], ['model', 'Model Mobil'], ['pesaing', 'Data Pesaing'], ['promo', 'Promo'], ['testimoni', 'Testimoni'], ['serah-terima', 'Serah Terima Unit'], ['konten/home', 'Beranda'], ['konten/prices', 'Halaman Harga'], ['sales', 'Profil Sales'], ['tema', 'Warna Template'], ['leasing', 'Mitra Leasing'], ['layout', 'Layout & Urutan'], ['media', 'Media Gambar'], ['pengaturan', 'Pengaturan Situs'], ['jadwal', 'Jadwal Terbit'], ['rencana', 'Rencana & Keyword'], ['laporan', 'Laporan'], ['zip', 'Upload ZIP']]
+  }
+};
+
+/* ---------- pembantu murni (diuji terpisah) ---------- */
+// <helpers>
+function E(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function rp(n) { return 'Rp' + Number(n || 0).toLocaleString('id-ID'); }
+function digits(v) { return Number(String(v).replace(/\D/g, '')) || 0; }
+function todayWIB() { return new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10); }
+function slugify(s) {
+  return String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+}
+function b64(str) { var b = new TextEncoder().encode(str), r = ''; for (var i = 0; i < b.length; i += 0x8000) r += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(r); }
+function unb64(s) { var r = atob(String(s).replace(/\s/g, '')), b = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) b[i] = r.charCodeAt(i); return new TextDecoder().decode(b); }
+function detectIndent(text) { var m = text.match(/\n([ \t]+)\S/); if (!m) return 2; return m[1].charAt(0) === '\t' ? '\t' : m[1].length; }
+function stringifyLike(obj, original) { return JSON.stringify(obj, null, detectIndent(original)) + (/\n$/.test(original) ? '\n' : ''); }
+
+function splitMD(raw) {
+  var m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  var eol = raw.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+  if (!m) return { has: false, fm: '', body: raw, eol: eol };
+  return { has: true, fm: m[1], body: m[2], eol: eol };
+}
+function joinMD(p) { return '---' + p.eol + p.fm + p.eol + '---' + p.eol + p.body; }
+function fmLine(fm, key) { return fm.match(new RegExp('^' + key + ':[ \\t]*(.*)$', 'm')); }
+function fmHas(fm, key) { return !!fmLine(fm, key); }
+function fmGet(fm, key) {
+  var m = fmLine(fm, key); if (!m) return '';
+  var v = m[1].trim();
+  if (/^".*"$/.test(v)) { try { return JSON.parse(v); } catch (e) { return v.slice(1, -1); } }
+  if (/^'.*'$/.test(v)) return v.slice(1, -1).replace(/''/g, "'");
+  return v;
+}
+// style: 'q' = beri tanda kutip bila kunci belum ada; 'p' = polos bila kunci belum ada
+function fmSet(fm, key, val, style) {
+  var m = fmLine(fm, key), line;
+  if (m && /^[>|]/.test(m[1].trim())) throw new Error('Kolom "' + key + '" memakai format YAML beberapa baris. Ubah lewat admin lengkap.');
+  if (typeof val === 'boolean') line = key + ': ' + val;
+  else {
+    val = String(val).replace(/[\r\n]+/g, ' ').trim();
+    var quote = m ? /^["']/.test(m[1].trim()) : style === 'q';
+    if (!quote && (/^[#&*!|>'"%@`\-?\[\]{},]/.test(val) || /\s#/.test(val) || val === '')) quote = true;
+    line = key + ': ' + (quote ? JSON.stringify(val) : val);
+  }
+  if (m) return fm.replace(new RegExp('^' + key + ':[ \\t]*(.*)$', 'm'), function () { return line; });
+  return fm + (fm.length ? '\n' : '') + line;
+}
+function minPrice(vs) { var p = (vs || []).map(function (v) { return Number(v.price) || 0; }).filter(Boolean); return p.length ? Math.min.apply(null, p) : 0; }
+// </helpers>
+
+/* ---------- penyimpanan token (PIN opsional, AES-GCM) ---------- */
+var LS = 'wins_master_admin_v1';
+var S = { cfg: null, site: 'geely', tab: 'home', pin: null, files: {}, dash: {}, art: {}, gen: 0, frame: null, wins: [] };
+var app = document.getElementById('app');
+var te = new TextEncoder();
+function toB64(buf) { var r = '', b = new Uint8Array(buf); for (var i = 0; i < b.length; i += 0x8000) r += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(r); }
+function fromB64(x) { return Uint8Array.from(atob(x), function (c) { return c.charCodeAt(0); }); }
+function deriveKey(pin, salt) {
+  return crypto.subtle.importKey('raw', te.encode(pin), 'PBKDF2', false, ['deriveKey']).then(function (k) {
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: 120000, hash: 'SHA-256' }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  });
+}
+function seal(obj, pin) {
+  var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  return deriveKey(pin, salt).then(function (k) { return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k, te.encode(JSON.stringify(obj))); })
+    .then(function (c) { return JSON.stringify({ s: toB64(salt), i: toB64(iv), c: toB64(c) }); });
+}
+function unseal(str, pin) {
+  var o = JSON.parse(str);
+  return deriveKey(pin, fromB64(o.s)).then(function (k) { return crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(o.i) }, k, fromB64(o.c)); })
+    .then(function (p) { return JSON.parse(new TextDecoder().decode(p)); });
+}
+function persist() {
+  if (S.pin) return seal(S.cfg, S.pin).then(function (s) { localStorage.setItem(LS, s); });
+  localStorage.setItem(LS, JSON.stringify(S.cfg)); return Promise.resolve();
+}
+function defaultCfg() { var c = {}; Object.keys(SITES).forEach(function (k) { c[k] = { owner: SITES[k].owner, repo: SITES[k].repo, branch: SITES[k].branch, token: '' }; }); return c; }
+function mergeCfg(c) { var d = defaultCfg(); Object.keys(d).forEach(function (k) { d[k] = Object.assign(d[k], (c && c[k]) || {}); }); return d; }
+
+/* ---------- GitHub API ---------- */
+function enc2(p) { return p.split('/').map(encodeURIComponent).join('/'); }
+function gh(site, path, opt) {
+  opt = opt || {};
+  var c = S.cfg[site];
+  if (!c || !c.token) return Promise.reject(Object.assign(new Error('Token ' + SITES[site].label + ' belum diisi (menu Pengaturan).'), { status: 401 }));
+  var h = { Authorization: 'Bearer ' + c.token, Accept: 'application/vnd.github+json' };
+  if (opt.body) h['Content-Type'] = 'application/json';
+  return fetch('https://api.github.com/repos/' + c.owner + '/' + c.repo + path, { method: opt.method || 'GET', headers: h, body: opt.body ? JSON.stringify(opt.body) : undefined, cache: 'no-store' })
+    .then(function (r) {
+      if (r.status === 204) return null;
+      if (!r.ok) return r.text().then(function (t) { var m = t; try { m = JSON.parse(t).message || t; } catch (e) {} var err = new Error('GitHub ' + r.status + ': ' + m); err.status = r.status; throw err; });
+      return r.json();
+    });
+}
+function getFile(site, path) {
+  var c = S.cfg[site];
+  return gh(site, '/contents/' + enc2(path) + '?ref=' + encodeURIComponent(c.branch)).then(function (j) {
+    if (Array.isArray(j)) throw new Error(path + ' adalah folder');
+    if (j.content) return { sha: j.sha, text: unb64(j.content) };
+    return gh(site, '/git/blobs/' + j.sha).then(function (b) { return { sha: j.sha, text: unb64(b.content) }; });
+  });
+}
+function putFile(site, path, text, sha, msg) {
+  var body = { message: msg || ('Update ' + path + ' via Master Admin'), content: b64(text), branch: S.cfg[site].branch };
+  if (sha) body.sha = sha;
+  return gh(site, '/contents/' + enc2(path), { method: 'PUT', body: body });
+}
+function getJSON(site, path, force) {
+  var k = site + ':' + path;
+  if (!force && S.files[k]) return Promise.resolve(S.files[k]);
+  return getFile(site, path).then(function (f) { var o = JSON.parse(f.text); S.files[k] = o; return o; });
+}
+// Selalu ambil versi terbaru dari GitHub lalu terapkan perubahan, supaya tidak menimpa perubahan lain.
+function modifyJSON(site, path, fn, msg) {
+  function attempt(n) {
+    return getFile(site, path).then(function (f) {
+      var obj = JSON.parse(f.text); fn(obj);
+      return putFile(site, path, stringifyLike(obj, f.text), f.sha, msg).then(function () { S.files[site + ':' + path] = obj; return obj; });
+    }).catch(function (e) { if ((e.status === 409 || e.status === 422) && n < 1) return attempt(n + 1); throw e; });
+  }
+  return attempt(0);
+}
+function modifyText(site, path, fn, msg) {
+  function attempt(n) {
+    return getFile(site, path).then(function (f) {
+      var out = fn(f.text);
+      return putFile(site, path, out, f.sha, msg);
+    }).catch(function (e) { if ((e.status === 409 || e.status === 422) && n < 1) return attempt(n + 1); throw e; });
+  }
+  return attempt(0);
+}
+
+/* ---------- UI umum ---------- */
+function toast(m, bad) {
+  var t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.textContent = m; document.body.appendChild(t);
+  setTimeout(function () { t.remove(); }, bad ? 6000 : 2800);
+}
+function openSheet(title, sub, bodyHtml, onSave, saveLabel, extraBtns) {
+  closeSheet();
+  var bg = document.createElement('div'); bg.className = 'sheet-bg'; bg.id = 'sheet';
+  bg.innerHTML = '<div class="sheet"><h2>' + E(title) + '</h2>' + (sub ? '<div class="muted" style="font-size:.85rem">' + sub + '</div>' : '') + bodyHtml +
+    '<div class="actions"><button class="btn" id="sv">' + E(saveLabel || 'Simpan ke GitHub') + '</button><button class="btn s" id="cl">Tutup</button>' + (extraBtns || '') + '</div></div>';
+  document.body.appendChild(bg);
+  bg.addEventListener('click', function (e) { if (e.target === bg) closeSheet(); });
+  document.getElementById('cl').onclick = closeSheet;
+  document.getElementById('sv').onclick = function () {
+    var b = this; b.disabled = true; var old = b.textContent; b.textContent = 'Menyimpan…';
+    Promise.resolve().then(onSave).then(function () { closeSheet(); toast('Tersimpan di GitHub. Website update otomatis ±1-2 menit.'); render(); })
+      .catch(function (e) { toast(e.message || String(e), true); b.disabled = false; b.textContent = old; });
+  };
+  return bg;
+}
+function closeSheet() { var s = document.getElementById('sheet'); if (s) s.remove(); }
+function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+function cur() { return SITES[S.site]; }
+function hasToken(site) { return !!(S.cfg && S.cfg[site] && S.cfg[site].token); }
+
+/* ---------- kerangka ---------- */
+var TABS = [['home', 'Ringkasan'], ['models', 'Model & Harga'], ['articles', 'Artikel'], ['promo', 'Promo'], ['more', 'Fitur Lain'], ['settings', 'Pengaturan']];
+function shell(inner) {
+  document.documentElement.style.setProperty('--acc', cur().color);
+  var tabs = TABS.filter(function (t) { return t[0] !== 'promo' || cur().promo; });
+  app.innerHTML = '<header><div class="top"><b>Master Admin</b><span class="muted">Geely · XPeng · BYD</span></div>' +
+    '<div class="pills">' + Object.keys(SITES).map(function (k) { return '<button class="pill' + (k === S.site ? ' on' : '') + '" data-act="site" data-k="' + k + '" style="--c:' + SITES[k].color + '">' + SITES[k].label + '</button>'; }).join('') + '</div>' +
+    '<nav>' + tabs.map(function (t) { return '<button class="' + (t[0] === S.tab ? 'on' : '') + '" data-act="tab" data-k="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</nav></header><main>' + inner + '</main>';
+}
+function render() {
+  if (S.tab === 'promo' && !cur().promo) S.tab = 'home';
+  var f = { home: viewHome, models: viewModels, articles: viewArticles, promo: viewPromo, more: viewMore, settings: viewSettings }[S.tab];
+  f();
+}
+function needToken() {
+  shell('<div class="card"><h3>Token ' + E(cur().label) + ' belum diisi</h3><p class="muted">Isi token GitHub untuk situs ini di menu Pengaturan.</p><div class="actions"><button class="btn" data-act="tab" data-k="settings">Buka Pengaturan</button></div></div>');
+}
+
+/* ---------- Ringkasan ---------- */
+function ago(iso) {
+  var s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 90) return 'baru saja'; if (s < 5400) return Math.round(s / 60) + ' menit lalu';
+  if (s < 129600) return Math.round(s / 3600) + ' jam lalu'; return Math.round(s / 86400) + ' hari lalu';
+}
+function loadDash(site) {
+  var c = S.cfg[site], out = {};
+  var p1 = gh(site, '/commits?per_page=1&sha=' + encodeURIComponent(c.branch)).then(function (a) { if (a[0]) out.commit = { msg: a[0].commit.message.split('\n')[0], date: a[0].commit.author.date }; });
+  var p2 = gh(site, '/actions/runs?per_page=1&branch=' + encodeURIComponent(c.branch)).then(function (r) { var w = r.workflow_runs && r.workflow_runs[0]; if (w) out.run = { st: w.status, cc: w.conclusion, url: w.html_url, date: w.created_at }; }).catch(function () { out.noRun = true; });
+  var cfgm = SITES[site].models;
+  var p3 = getJSON(site, cfgm.path).then(function (a) { out.models = a.length; }).catch(function () {});
+  var ar = SITES[site].articles, p4;
+  if (ar.kind === 'json') p4 = getJSON(site, ar.path).then(function (a) { out.arts = a.length; out.drafts = a.filter(function (x) { return x.status !== 'published'; }).length; }).catch(function () {});
+  else p4 = gh(site, '/contents/' + enc2(ar.dir) + '?ref=' + encodeURIComponent(c.branch)).then(function (a) { out.arts = a.filter(function (x) { return /\.md$/.test(x.name); }).length; }).catch(function () {});
+  return Promise.all([p1, p2, p3, p4]).then(function () { S.dash[site] = out; }).catch(function (e) { S.dash[site] = { err: e.message }; });
+}
+function dashCard(site) {
+  var s = SITES[site], d = S.dash[site], h = '<div class="card"><h3 style="color:' + s.color + '">' + s.label + '</h3>';
+  if (!hasToken(site)) h += '<p class="muted">Belum login. Isi token di Pengaturan.</p>';
+  else if (!d) h += '<p class="muted">Memuat…</p>';
+  else if (d.err) h += '<p><span class="badge bad">Gagal</span> ' + E(d.err) + '</p>';
+  else {
+    var run = '';
+    if (d.run) {
+      if (d.run.st !== 'completed') run = '<span class="badge warn">Sedang build</span>';
+      else if (d.run.cc === 'success') run = '<span class="badge ok">Build sukses</span>';
+      else run = '<span class="badge bad">Build GAGAL: ' + E(d.run.cc) + '</span>';
+      run = '<a href="' + E(d.run.url) + '" target="_blank" rel="noopener" style="text-decoration:none">' + run + '</a> <span class="muted" style="font-size:.8rem">' + ago(d.run.date) + '</span>';
+    } else if (d.noRun) run = '<span class="badge">Status build tidak tersedia (token perlu izin Actions: Read)</span>';
+    h += '<div>' + run + '</div>';
+    if (d.commit) h += '<p class="note">Perubahan terakhir: ' + E(d.commit.msg) + ' (' + ago(d.commit.date) + ')</p>';
+    h += '<p class="note">' + (d.models != null ? d.models + ' model' : '') + (d.arts != null ? ' · ' + d.arts + ' artikel' : '') + (d.drafts ? ' (' + d.drafts + ' belum terbit)' : '') + '</p>';
+  }
+  h += '<div class="actions"><a class="btn" href="' + E(s.live) + '" target="_blank" rel="noopener">Lihat situs</a><a class="btn" href="' + E(s.admin) + '" target="_blank" rel="noopener">Admin lengkap</a></div></div>';
+  return h;
+}
+function viewHome() {
+  var gen = ++S.gen;
+  shell('<div id="dash">' + Object.keys(SITES).map(dashCard).join('') + '</div><p class="note">Perubahan yang Anda simpan di sini langsung masuk ke repo masing-masing situs, lalu GitHub membangun ulang website otomatis. Kalau status build merah, website lama tetap tayang; buka tautan statusnya untuk melihat penyebabnya.</p>');
+  var todo = Object.keys(SITES).filter(hasToken);
+  Promise.all(todo.map(loadDash)).then(function () { if (gen === S.gen && S.tab === 'home') { var el = document.getElementById('dash'); if (el) el.innerHTML = Object.keys(SITES).map(dashCard).join(''); } });
+}
+
+/* ---------- Model & Harga ---------- */
+function priceSummary(site, m) {
+  var c = SITES[site].models;
+  if (c.price === 'string') return m.harga || '';
+  var mp = minPrice(m.variants); return mp ? 'Mulai ' + rp(mp) : '';
+}
+function viewModels() {
+  if (!hasToken(S.site)) return needToken();
+  var site = S.site, gen = ++S.gen, c = cur().models;
+  shell('<p class="muted">Memuat model…</p>');
+  getJSON(site, c.path, true).then(function (list) {
+    if (gen !== S.gen) return;
+    var h = list.map(function (m, i) {
+      return '<button class="item" data-act="model" data-i="' + i + '"><div><div class="t">' + E(m[c.name]) + (('published' in m && !m.published) ? ' <span class="badge warn">Disembunyikan</span>' : '') + '</div><div class="s">' + E(m[c.sub] || '') + '</div></div><div class="s" style="text-align:right">' + E(priceSummary(site, m)) + '</div></button>';
+    }).join('');
+    shell((h || '<div class="empty">Belum ada model.</div>') + '<p class="note">Yang bisa diubah di sini: nama, tipe, tagline, harga, dan status tayang. Foto, warna, spesifikasi, dan FAQ tetap lewat admin lengkap.</p>');
+  }).catch(function (e) { if (gen === S.gen) shell('<div class="card"><span class="badge bad">Gagal</span> ' + E(e.message) + '</div>'); });
+}
+function modelForm(site, m) {
+  var c = SITES[site].models;
+  var h = '<label>Nama<input id="f_name" value="' + E(m[c.name]) + '"></label>' +
+    '<label>Tipe<input id="f_sub" value="' + E(m[c.sub]) + '"></label>' +
+    '<label>Tagline / ringkasan<textarea id="f_tag" rows="3">' + E(m[c.tag]) + '</textarea></label>';
+  if (c.price === 'string') h += '<label>Harga (teks yang tampil di website)<input id="f_harga" value="' + E(m.harga) + '"></label>';
+  else (m.variants || []).forEach(function (v, i) {
+    h += '<div class="row2"><label>Varian ' + (i + 1) + '<input id="v_n' + i + '" value="' + E(v.name) + '"></label><label>Harga (Rp)<input id="v_p' + i + '" inputmode="numeric" value="' + E(v.price) + '"></label></div>';
+  });
+  if ('published' in m) h += '<label class="chk"><input type="checkbox" id="f_pub"' + (m.published ? ' checked' : '') + '> Tayang di website</label>';
+  if (c.price === 'variants') h += '<p class="note">Menambah atau menghapus varian lewat admin lengkap.</p>';
+  return h;
+}
+function editModel(i) {
+  var site = S.site, c = cur().models, m = S.files[site + ':' + c.path][i], slug = m.slug;
+  var sh = openSheet(m[c.name], E(slug), modelForm(site, m), function () {
+    var name = val('f_name').trim(); if (!name) throw new Error('Nama tidak boleh kosong');
+    var nv = [], pub = document.getElementById('f_pub');
+    (m.variants || []).forEach(function (v, k) { nv.push({ name: val('v_n' + k).trim(), price: digits(val('v_p' + k)) }); });
+    return modifyJSON(site, c.path, function (arr) {
+      var t = arr.filter(function (x) { return x.slug === slug; })[0];
+      if (!t) throw new Error('Model ini sudah tidak ada di GitHub. Muat ulang halaman.');
+      t[c.name] = name; t[c.sub] = val('f_sub').trim(); t[c.tag] = val('f_tag').trim();
+      if (c.price === 'string') t.harga = val('f_harga').trim();
+      else nv.forEach(function (v, k) { if (t.variants && t.variants[k]) { t.variants[k].name = v.name; t.variants[k].price = v.price; } });
+      if (pub && 'published' in t) t.published = pub.checked;
+    }, 'Update model ' + slug + ' via Master Admin');
+  }, null, '<button class="btn s" id="goold">Foto, warna, spesifikasi</button>');
+  sh.querySelector('#goold').onclick = function () { openOld(site, deepTarget(site, 'model', slug), m[c.name]); };
+}
+
+/* ---------- Artikel ---------- */
+function artStatus(site, item) {
+  var k = SITES[site].articles.statusKey;
+  if (item.status == null) return '';
+  if (k === 'draft') return item.status === 'true' ? 'draft' : 'published';
+  return item.status;
+}
+function viewArticles() {
+  if (!hasToken(S.site)) return needToken();
+  var site = S.site, gen = ++S.gen, a = cur().articles;
+  shell('<p class="muted">Memuat artikel…</p>');
+  var load;
+  if (a.kind === 'json') load = getJSON(site, a.path, true).then(function (arr) {
+    return arr.map(function (x) { return { slug: x.slug, title: x.title, date: x.date, status: x.status || 'published' }; });
+  });
+  else load = gh(site, '/contents/' + enc2(a.dir) + '?ref=' + encodeURIComponent(S.cfg[site].branch)).then(function (arr) {
+    return arr.filter(function (x) { return /\.md$/.test(x.name); }).map(function (x) { return { slug: x.name.replace(/\.md$/, ''), path: x.path, title: '', date: '', status: null }; });
+  });
+  load.then(function (items) {
+    if (gen !== S.gen) return;
+    S.art[site] = { items: items, q: '' };
+    drawArticles(gen);
+    if (a.kind === 'md') fillMeta(site, items, gen);
+  }).catch(function (e) { if (gen === S.gen) shell('<div class="card"><span class="badge bad">Gagal</span> ' + E(e.message) + '</div>'); });
+}
+function drawArticles(gen) {
+  if (gen !== S.gen || S.tab !== 'articles') return;
+  var site = S.site, st = S.art[site], a = cur().articles, q = (st.q || '').toLowerCase();
+  var items = st.items.slice().sort(function (x, y) { return String(y.date).localeCompare(String(x.date)); })
+    .filter(function (x) { return !q || (x.title + ' ' + x.slug).toLowerCase().indexOf(q) >= 0; });
+  var h = '<input class="srch" id="q" placeholder="Cari artikel…" value="' + E(st.q || '') + '">' +
+    (a.canCreate ? '<div class="actions" style="margin:0 0 12px"><button class="btn" data-act="newart">+ Artikel baru</button></div>' : '<p class="note" style="margin:0 0 12px">Artikel baru BYD dibuat lewat admin lengkap, karena pemeriksa SEO-nya ketat.</p>');
+  h += items.map(function (x) {
+    var s = artStatus(site, x), b = s === 'published' ? '<span class="badge ok">Terbit</span>' : s ? '<span class="badge warn">' + E(s === 'draft' ? 'Draft' : s) + '</span>' : '';
+    return '<button class="item" data-act="art" data-slug="' + E(x.slug) + '"><div><div class="t">' + E(x.title || x.slug) + '</div><div class="s">' + E(x.date || '') + '</div></div>' + b + '</button>';
+  }).join('') || '<div class="empty">Tidak ada artikel.</div>';
+  var active = document.activeElement && document.activeElement.id === 'q';
+  shell(h);
+  var qi = document.getElementById('q');
+  if (qi) { qi.oninput = function () { st.q = qi.value; drawArticles(S.gen); }; if (active) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); } }
+}
+function fillMeta(site, items, gen) {
+  var i = 0, active = 0, a = SITES[site].articles, last = 0;
+  function pump() {
+    while (active < 5 && i < items.length) {
+      (function (it) {
+        active++;
+        getFile(site, it.path).then(function (f) {
+          var p = splitMD(f.text);
+          it.title = fmGet(p.fm, 'title') || it.slug; it.date = fmGet(p.fm, 'date');
+          var sv = fmGet(p.fm, a.statusKey); it.status = a.statusKey === 'draft' ? String(sv === 'true') : (sv || 'published');
+        }).catch(function () { it.title = it.slug; }).then(function () {
+          active--; if (gen !== S.gen) return;
+          if (Date.now() - last > 400 || (i >= items.length && active === 0)) { last = Date.now(); drawArticles(gen); }
+          pump();
+        });
+      })(items[i++]);
+    }
+  }
+  pump();
+}
+function artForm(site, d) {
+  var a = SITES[site].articles, sts = a.statusKey === 'draft' ? [['true', 'Draft (belum terbit)'], ['false', 'Terbit']] : [['draft', 'Draft (belum terbit)'], ['published', 'Terbit']];
+  if (a.statusKey !== 'draft' && d.status && !sts.some(function (s) { return s[0] === d.status; })) sts.push([d.status, d.status]);
+  var h = '<label>Judul<input id="a_title" value="' + E(d.title) + '"></label>' +
+    '<label>Deskripsi (meta description)<textarea id="a_desc" rows="3">' + E(d.description) + '</textarea></label><div class="counter" id="a_cnt"></div>' +
+    '<div class="row2"><label>Tanggal<input id="a_date" type="date" value="' + E(String(d.date).slice(0, 10)) + '"></label>' +
+    '<label>Status<select id="a_status">' + sts.map(function (s) { return '<option value="' + E(s[0]) + '"' + (String(d.status) === s[0] ? ' selected' : '') + '>' + E(s[1]) + '</option>'; }).join('') + '</select></label></div>' +
+    '<label>Isi artikel (Markdown)<textarea id="a_body" rows="14" style="font-family:ui-monospace,Menlo,monospace;font-size:.85rem;min-height:260px">' + E(d.body) + '</textarea></label>';
+  return h;
+}
+function bindCounter(max) {
+  var t = document.getElementById('a_desc'), c = document.getElementById('a_cnt'); if (!t || !c) return;
+  function u() { var n = t.value.length; c.textContent = n + (max ? ' / ' + max : '') + ' karakter'; c.className = 'counter' + (max && n > max ? ' over' : ''); }
+  t.oninput = u; u();
+}
+function validateArt(site) {
+  var a = SITES[site].articles;
+  if (!val('a_title').trim()) throw new Error('Judul tidak boleh kosong');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(val('a_date'))) throw new Error('Tanggal belum diisi');
+  if (a.descMax && val('a_desc').length > a.descMax) throw new Error('Deskripsi maksimal ' + a.descMax + ' karakter, kalau tidak build website gagal.');
+}
+function openArticle(slug) {
+  var site = S.site, a = cur().articles;
+  if (a.kind === 'json') {
+    var arr = S.files[site + ':' + a.path], x = arr.filter(function (z) { return z.slug === slug; })[0];
+    if (!x) return;
+    var sh1 = openSheet(x.title, E(slug), artForm(site, { title: x.title, description: x.description, date: x.date, status: x.status || 'published', body: x.body }), function () {
+      validateArt(site);
+      return modifyJSON(site, a.path, function (list) {
+        var t = list.filter(function (z) { return z.slug === slug; })[0]; if (!t) throw new Error('Artikel sudah tidak ada di GitHub');
+        t.title = val('a_title').trim(); t.description = val('a_desc').trim(); t.date = val('a_date'); t.status = val('a_status'); t.body = val('a_body');
+      }, 'Update artikel ' + slug + ' via Master Admin');
+    }, null, '<button class="btn s" id="goold">Gambar & SEO lengkap</button>');
+    sh1.querySelector('#goold').onclick = function () { openOld(site, deepTarget(site, 'article', slug), x.title); };
+    bindCounter(0);
+    return;
+  }
+  var path = a.dir + '/' + slug + '.md';
+  toast('Membuka artikel…');
+  getFile(site, path).then(function (f) {
+    var p = splitMD(f.text);
+    var sv = fmGet(p.fm, a.statusKey);
+    var d = { title: fmGet(p.fm, 'title'), description: fmGet(p.fm, 'description'), date: fmGet(p.fm, 'date'), status: a.statusKey === 'draft' ? String(sv === 'true') : (sv || 'draft'), body: p.body.replace(/^\r?\n/, '') };
+    var sh2 = openSheet(d.title || slug, E(slug) + ' · field lain di bagian atas file tidak diubah', artForm(site, d), function () {
+      validateArt(site);
+      return modifyText(site, path, function (raw) {
+        var q = splitMD(raw); if (!q.has) throw new Error('File artikel tidak punya bagian pengaturan (---) di atas.');
+        var style = site === 'geely' ? 'q' : 'p', fm = q.fm;
+        fm = fmSet(fm, 'title', val('a_title'), style); fm = fmSet(fm, 'description', val('a_desc'), style);
+        fm = fmSet(fm, 'date', val('a_date'), 'p');
+        fm = a.statusKey === 'draft' ? fmSet(fm, 'draft', val('a_status') === 'true') : fmSet(fm, a.statusKey, val('a_status'), 'p');
+        if (fmHas(fm, 'updated')) fm = fmSet(fm, 'updated', todayWIB(), 'p');
+        q.fm = fm; q.body = q.eol + val('a_body').replace(/\r?\n/g, q.eol).replace(/\s+$/, '') + q.eol;
+        return joinMD(q);
+      }, 'Update artikel ' + slug + ' via Master Admin');
+    }, null, '<button class="btn s" id="goold">Gambar & SEO lengkap</button>');
+    sh2.querySelector('#goold').onclick = function () { openOld(site, deepTarget(site, 'article', slug), d.title || slug); };
+    bindCounter(a.descMax || 0);
+  }).catch(function (e) { toast(e.message, true); });
+}
+function newArticle() {
+  var site = S.site, a = cur().articles;
+  openSheet('Artikel baru', 'Disimpan sebagai draft. Terbitkan setelah selesai dicek.', artForm(site, { title: '', description: '', date: todayWIB(), status: a.statusKey === 'draft' ? 'true' : 'draft', body: '' }) +
+    '<label>Alamat artikel (slug, otomatis dari judul bila kosong)<input id="a_slug" autocapitalize="none" placeholder="contoh: harga-geely-ex2"></label>', function () {
+    validateArt(site);
+    var slug = slugify(val('a_slug') || val('a_title')); if (!slug) throw new Error('Alamat artikel tidak valid');
+    if (a.kind === 'json') {
+      return modifyJSON(site, a.path, function (list) {
+        if (list.some(function (z) { return z.slug === slug; })) throw new Error('Alamat "' + slug + '" sudah dipakai artikel lain');
+        list.unshift({ slug: slug, title: val('a_title').trim(), keyword: '', description: val('a_desc').trim(), image: '', imageAlt: '', date: val('a_date'), status: val('a_status'), category: 'Umum', body: val('a_body') });
+      }, 'Artikel baru ' + slug + ' via Master Admin');
+    }
+    var path = a.dir + '/' + slug + '.md';
+    return getFile(site, path).then(function () { throw new Error('Alamat "' + slug + '" sudah dipakai artikel lain'); }, function (e) {
+      if (e.status !== 404) throw e;
+      var fm = 'title: ' + JSON.stringify(val('a_title').trim()) + '\ndescription: ' + JSON.stringify(val('a_desc').trim()) + '\ndate: ' + val('a_date') + '\ncategory: "Info Geely"\ntags: []\ndraft: ' + (val('a_status') === 'true');
+      return putFile(site, path, '---\n' + fm + '\n---\n\n' + val('a_body').replace(/\s+$/, '') + '\n', null, 'Artikel baru ' + slug + ' via Master Admin');
+    });
+  });
+  bindCounter(a.descMax || 0);
+}
+
+/* ---------- Promo (Geely) ---------- */
+function viewPromo() {
+  if (!hasToken(S.site)) return needToken();
+  var site = S.site, gen = ++S.gen, p = cur().promo;
+  shell('<p class="muted">Memuat promo…</p>');
+  getJSON(site, p.path, true).then(function (list) {
+    if (gen !== S.gen) return;
+    var h = list.map(function (x, i) {
+      return '<button class="item" data-act="promo" data-i="' + i + '"><div><div class="t">' + E(x.judul) + '</div><div class="s">' + E(x.periode || '') + '</div></div>' + (x.aktif ? '<span class="badge ok">Aktif</span>' : '<span class="badge">Nonaktif</span>') + '</button>';
+    }).join('');
+    shell((h || '<div class="empty">Belum ada promo.</div>') + '<p class="note">Promo baru dan ganti foto promo lewat admin lengkap.</p>');
+  }).catch(function (e) { if (gen === S.gen) shell('<div class="card"><span class="badge bad">Gagal</span> ' + E(e.message) + '</div>'); });
+}
+function editPromo(i) {
+  var site = S.site, p = cur().promo, x = S.files[site + ':' + p.path][i], id = x.id;
+  var models = (S.files[site + ':' + cur().models.path] || []);
+  var opts = '<option value="">(semua model)</option>' + models.map(function (m) { return '<option value="' + E(m.slug) + '"' + (x.model === m.slug ? ' selected' : '') + '>' + E(m[cur().models.name]) + '</option>'; }).join('');
+  if (x.model && !models.some(function (m) { return m.slug === x.model; })) opts += '<option value="' + E(x.model) + '" selected>' + E(x.model) + '</option>';
+  var sh3 = openSheet(x.judul, E(id), '<label>Judul<input id="p_j" value="' + E(x.judul) + '"></label><label>Deskripsi<textarea id="p_d" rows="4">' + E(x.deskripsi) + '</textarea></label>' +
+    '<div class="row2"><label>Periode / berlaku sampai<input id="p_p" value="' + E(x.periode) + '"></label><label>Model<select id="p_m">' + opts + '</select></label></div>' +
+    '<label class="chk"><input type="checkbox" id="p_a"' + (x.aktif ? ' checked' : '') + '> Promo aktif</label>', function () {
+    if (!val('p_j').trim()) throw new Error('Judul tidak boleh kosong');
+    return modifyJSON(site, p.path, function (list) {
+      var t = list.filter(function (z) { return z.id === id; })[0]; if (!t) throw new Error('Promo sudah tidak ada di GitHub');
+      t.judul = val('p_j').trim(); t.deskripsi = val('p_d').trim(); t.periode = val('p_p').trim(); t.model = val('p_m'); t.aktif = document.getElementById('p_a').checked;
+    }, 'Update promo ' + id + ' via Master Admin');
+  }, null, '<button class="btn s" id="goold">Ganti foto / promo baru</button>');
+  sh3.querySelector('#goold').onclick = function () { openOld(site, deepTarget(site, 'promo'), x.judul); };
+}
+
+/* ---------- Admin lama di dalam panel (lewat bridge.js) ---------- */
+function originOf(u) { try { return new URL(u).origin; } catch (e) { return ''; } }
+function oldUrl(site, target) {
+  var s = SITES[site], t = target || '';
+  if (!t) return s.admin;
+  return s.admin + (site === 'byd' ? '#/' + t : '#mt=' + t);
+}
+function deepTarget(site, kind, slug) {
+  var t = (SITES[site].deep || {})[kind];
+  return t ? t.replace('{slug}', encodeURIComponent(slug || '')) : '';
+}
+function closeOld() { var o = document.getElementById('old'); if (o) o.remove(); S.frame = null; }
+function openOld(site, target, label) {
+  if (!hasToken(site)) { toast('Isi token ' + SITES[site].label + ' dulu di Pengaturan.', true); return; }
+  closeSheet(); closeOld();
+  var url = oldUrl(site, target);
+  var bg = document.createElement('div'); bg.className = 'old-bg'; bg.id = 'old';
+  bg.innerHTML = '<div class="old-bar"><button id="old_back">← Panel</button><b>' + E(SITES[site].label + (label ? ' · ' + label : '')) + '</b><a id="old_tab" href="' + E(url) + '" target="_blank" rel="noopener">Tab baru</a></div><iframe id="old_if" allow="clipboard-write; clipboard-read"></iframe>';
+  document.body.appendChild(bg);
+  var f = document.getElementById('old_if'); S.frame = f; f.src = url;
+  document.getElementById('old_back').onclick = function () { closeOld(); S.gen++; render(); };
+  // "Tab tersendiri" tidak bisa menerima login dari Master (butuh opener), jadi dibuka lewat window.open
+  document.getElementById('old_tab').onclick = function (e) {
+    e.preventDefault(); var w = window.open(url, '_blank'); if (w) { S.wins = S.wins || []; S.wins.push(w); closeOld(); }
+  };
+}
+window.addEventListener('message', function (e) {
+  var d = e.data; if (!d || d.type !== 'wins-ready' || !S.cfg || !e.source) return;
+  var site = null; Object.keys(SITES).forEach(function (k) { if (originOf(SITES[k].admin) === e.origin) site = k; });
+  if (!site || d.site !== site || !hasToken(site)) return;
+  var mine = (S.frame && S.frame.contentWindow === e.source) || (S.wins || []).indexOf(e.source) >= 0;
+  if (!mine) return;
+  var c = S.cfg[site];
+  e.source.postMessage({ type: 'wins-cfg', site: site, cfg: { owner: c.owner, repo: c.repo, branch: c.branch, token: c.token } }, e.origin);
+});
+function viewMore() {
+  var s = cur();
+  shell('<p class="muted" style="margin-top:0">Fitur yang belum ada di panel ini. Admin ' + E(s.label) + ' terbuka di dalam panel, langsung di halaman yang dituju.</p><div class="grid">' +
+    s.links.map(function (l) { return '<button class="item" data-act="old" data-t="' + E(l[0]) + '" data-l="' + E(l[1]) + '"><div class="t" style="font-size:.9rem">' + E(l[1]) + '</div></button>'; }).join('') +
+    '</div><p class="note">Pertama kali, pasang bridge.js di admin lama (lihat PANDUAN.md). Tanpa bridge, admin lama minta login sendiri.</p>');
+}
+
+/* ---------- Pengaturan & login ---------- */
+function viewSettings(msg) {
+  var h = '<div class="card"><h3>Token GitHub per situs</h3><p class="note" style="margin-top:0">Token hanya disimpan di browser ini. Buat token di GitHub: Settings, Developer settings, Fine-grained tokens. Izin: Contents (Read and write), Actions (Read), Metadata (Read). Token fine-grained hanya berlaku untuk satu akun pemilik repo, jadi tiap situs bisa punya token sendiri. Kalau satu akun Anda punya akses ke ketiga repo, satu token klasik (scope <i>repo</i>) cukup.</p></div>';
+  Object.keys(SITES).forEach(function (k) {
+    var c = S.cfg[k];
+    h += '<div class="card"><h3 style="color:' + SITES[k].color + '">' + SITES[k].label + '</h3>' +
+      '<div class="row2"><label>Pemilik<input id="o_' + k + '" autocapitalize="none" value="' + E(c.owner) + '"></label><label>Repo<input id="r_' + k + '" autocapitalize="none" value="' + E(c.repo) + '"></label></div>' +
+      '<label>Branch<input id="b_' + k + '" autocapitalize="none" value="' + E(c.branch) + '"></label>' +
+      '<label>Token<input id="t_' + k + '" type="password" autocapitalize="none" autocomplete="off" value="' + E(c.token) + '"></label>' +
+      '<div class="actions"><button class="btn s" data-act="test" data-k="' + k + '">Tes koneksi</button></div><pre class="out" id="out_' + k + '"></pre></div>';
+  });
+  h += '<div class="card"><label style="margin-top:0">PIN pengaman (opsional, 4+ angka). Token dienkripsi, PIN diminta tiap membuka panel.<input id="pin" type="password" inputmode="numeric" placeholder="' + (S.pin ? 'PIN aktif, isi untuk mengganti' : 'kosongkan jika tidak pakai PIN') + '" autocomplete="off"></label>' +
+    '<div class="actions"><button class="btn" data-act="saveCfg">Simpan pengaturan</button><button class="btn s" data-act="copyTok">Pakai token situs pertama untuk semua</button><button class="btn d" data-act="logout">Keluar dan hapus token</button></div></div>';
+  shell((msg ? '<div class="card"><span class="badge ok">' + E(msg) + '</span></div>' : '') + h);
+}
+function readCfg() {
+  Object.keys(SITES).forEach(function (k) {
+    var cl = function (x) { return String(x || '').replace(/[^\x21-\x7E]/g, ''); };
+    S.cfg[k] = { owner: cl(val('o_' + k)), repo: cl(val('r_' + k)), branch: cl(val('b_' + k)) || 'main', token: cl(val('t_' + k)) };
+  });
+}
+function testSite(k) {
+  var out = document.getElementById('out_' + k), cl = function (x) { return String(x || '').replace(/[^\x21-\x7E]/g, ''); };
+  S.cfg[k] = { owner: cl(val('o_' + k)), repo: cl(val('r_' + k)), branch: cl(val('b_' + k)) || 'main', token: cl(val('t_' + k)) };
+  out.textContent = 'Menguji…';
+  gh(k, '').then(function (r) {
+    out.textContent = (r.permissions && r.permissions.push ? '✅ Terhubung, boleh menulis ke ' + r.full_name : '⚠️ Terhubung ke ' + r.full_name + ' tetapi token TIDAK punya izin menulis (butuh Contents: Read and write).');
+  }).catch(function (e) { out.textContent = '❌ ' + e.message + (e.status === 404 ? ' (nama pemilik/repo salah, atau token belum diberi akses ke repo ini)' : ''); });
+}
+
+/* ---------- boot ---------- */
+function pinView(raw, err) {
+  document.documentElement.style.setProperty('--acc', '#2f80ed');
+  app.innerHTML = '<main><div class="card" style="margin-top:12vh"><h3>Master Admin</h3><p class="muted">Masukkan PIN untuk membuka token.</p>' + (err ? '<p><span class="badge bad">' + E(err) + '</span></p>' : '') +
+    '<input id="pinin" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN"><div class="actions"><button class="btn" id="pgo">Buka</button><button class="btn d" id="pwipe">Lupa PIN, hapus data</button></div></div></main>';
+  function go() {
+    var pin = document.getElementById('pinin').value;
+    unseal(raw, pin).then(function (c) { S.cfg = mergeCfg(c); S.pin = pin; start(); }).catch(function () { pinView(raw, 'PIN salah'); });
+  }
+  document.getElementById('pgo').onclick = go;
+  document.getElementById('pinin').onkeydown = function (e) { if (e.key === 'Enter') go(); };
+  document.getElementById('pwipe').onclick = function () { if (confirm('Hapus semua token yang tersimpan di browser ini?')) { localStorage.removeItem(LS); S.cfg = defaultCfg(); S.pin = null; S.tab = 'settings'; render(); } };
+}
+function start() {
+  var any = Object.keys(SITES).some(hasToken);
+  S.tab = any ? 'home' : 'settings';
+  var first = Object.keys(SITES).filter(hasToken)[0]; if (first) S.site = first;
+  render();
+}
+function boot() {
+  var raw = null; try { raw = localStorage.getItem(LS); } catch (e) {}
+  if (!raw) { S.cfg = defaultCfg(); S.tab = 'settings'; return render(); }
+  var o; try { o = JSON.parse(raw); } catch (e) { S.cfg = defaultCfg(); S.tab = 'settings'; return render(); }
+  if (o && o.s && o.i && o.c) return pinView(raw);
+  S.cfg = mergeCfg(o); start();
+}
+
+/* ---------- aksi klik ---------- */
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-act]'); if (!el) return;
+  var a = el.getAttribute('data-act'), k = el.getAttribute('data-k');
+  if (a === 'site') { S.site = k; S.gen++; render(); }
+  else if (a === 'tab') { S.tab = k; S.gen++; render(); }
+  else if (a === 'model') editModel(+el.getAttribute('data-i'));
+  else if (a === 'art') openArticle(el.getAttribute('data-slug'));
+  else if (a === 'newart') newArticle();
+  else if (a === 'promo') editPromo(+el.getAttribute('data-i'));
+  else if (a === 'old') openOld(S.site, el.getAttribute('data-t'), el.getAttribute('data-l'));
+  else if (a === 'test') testSite(k);
+  else if (a === 'copyTok') {
+    var f = Object.keys(SITES)[0], t = String(val('t_' + f) || '').replace(/[^\x21-\x7E]/g, '');
+    Object.keys(SITES).forEach(function (s) { document.getElementById('t_' + s).value = t; });
+    toast('Token disalin ke semua situs. Tekan Tes koneksi lalu Simpan.');
+  }
+  else if (a === 'saveCfg') {
+    readCfg(); var pin = val('pin').trim();
+    if (pin) { if (pin.length < 4) return toast('PIN minimal 4 karakter', true); S.pin = pin; }
+    persist().then(function () { S.files = {}; S.dash = {}; S.art = {}; var any = Object.keys(SITES).some(hasToken); if (any) { S.tab = 'home'; var first = Object.keys(SITES).filter(hasToken)[0]; if (!hasToken(S.site)) S.site = first; render(); toast('Pengaturan tersimpan di browser ini.'); } else viewSettings('Tersimpan'); });
+  }
+  else if (a === 'logout') {
+    if (!confirm('Hapus semua token dari browser ini?')) return;
+    try { localStorage.removeItem(LS); } catch (x) {}
+    S.cfg = defaultCfg(); S.pin = null; S.files = {}; S.dash = {}; S.art = {}; S.tab = 'settings'; render();
+  }
+});
+
+boot();
+})();
+</script>
+</body>
+</html>
