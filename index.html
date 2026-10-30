@@ -262,7 +262,7 @@ function cur() { return SITES[S.site]; }
 function hasToken(site) { return !!(S.cfg && S.cfg[site] && S.cfg[site].token); }
 
 /* ---------- kerangka ---------- */
-var TABS = [['home', 'Ringkasan'], ['models', 'Model & Harga'], ['articles', 'Artikel'], ['promo', 'Promo'], ['more', 'Fitur Lain'], ['settings', 'Pengaturan']];
+var TABS = [['home', 'Ringkasan'], ['models', 'Model & Harga'], ['articles', 'Artikel'], ['promo', 'Promo'], ['more', 'Fitur Lain'], ['wahub', 'WA Hub'], ['settings', 'Pengaturan']];
 function shell(inner) {
   document.documentElement.style.setProperty('--acc', cur().color);
   var tabs = TABS.filter(function (t) { return t[0] !== 'promo' || cur().promo; });
@@ -272,7 +272,7 @@ function shell(inner) {
 }
 function render() {
   if (S.tab === 'promo' && !cur().promo) S.tab = 'home';
-  var f = { home: viewHome, models: viewModels, articles: viewArticles, promo: viewPromo, more: viewMore, settings: viewSettings }[S.tab];
+  var f = { home: viewHome, models: viewModels, articles: viewArticles, promo: viewPromo, more: viewMore, wahub: viewWAHub, settings: viewSettings }[S.tab];
   f();
 }
 function needToken() {
@@ -585,6 +585,19 @@ function viewMore() {
   shell('<p class="muted" style="margin-top:0">Fitur yang belum ada di panel ini. Admin ' + E(s.label) + ' terbuka di dalam panel, langsung di halaman yang dituju.</p><div class="grid">' +
     s.links.map(function (l) { return '<button class="item" data-act="old" data-t="' + E(l[0]) + '" data-l="' + E(l[1]) + '"><div class="t" style="font-size:.9rem">' + E(l[1]) + '</div></button>'; }).join('') +
     '</div><p class="note">Pertama kali, pasang bridge.js di admin lama (lihat PANDUAN.md). Tanpa bridge, admin lama minta login sendiri.</p>');
+}
+
+/* ---------- WA Hub ---------- */
+var WAHUB_RELEASE = 'https://github.com/geelywins/master-admin/releases/tag/wa-hub-latest';
+function viewWAHub() {
+  shell('<div class="card"><h3>WA Hub</h3><p class="muted" style="margin-top:0">Buka banyak nomor WhatsApp dalam satu jendela. WA Hub adalah aplikasi di komputer, bukan halaman web, jadi tidak bisa dibuka di dalam panel ini. WhatsApp tidak mengizinkan WhatsApp Web ditampilkan di dalam halaman lain.</p>' +
+    '<div class="actions"><a class="btn" href="' + WAHUB_RELEASE + '" target="_blank" rel="noopener">Unduh WA Hub (Windows / Mac)</a></div></div>' +
+    '<div class="card"><h3>Cara memulai</h3><ol class="muted" style="margin:0;padding-left:20px;line-height:1.7">' +
+    '<li>Buka halaman unduhan di atas, lalu unduh file .exe (Windows) atau .dmg (Mac) dari bagian Assets.</li>' +
+    '<li>Install. Windows menampilkan peringatan "publisher tidak dikenal": pilih More info, lalu Run anyway.</li>' +
+    '<li>Buka WA Hub, klik <b>+ Tambah akun</b>, beri nama (misalnya WA Sales), lalu scan QR dari HP: WhatsApp, Perangkat tertaut, Tautkan perangkat.</li>' +
+    '<li>Ulangi untuk tiap nomor. Login tersimpan, jadi QR cukup sekali.</li></ol></div>' +
+    '<p class="note">Panel kanan di WA Hub berisi template balasan dan saran AI. Keduanya hanya mengisi kotak ketik, pesan terkirim kalau Anda menekan kirim sendiri. Jangan pasang bot atau auto-reply, nomor bisa kena banned.</p>');
 }
 
 /* ---------- Pengaturan & login ---------- */
