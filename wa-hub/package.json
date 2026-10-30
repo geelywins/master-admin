@@ -1,6 +1,6 @@
 {
   "name": "wa-hub",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gabungkan banyak akun WhatsApp Web dalam satu aplikasi",
   "main": "main.js",
   "scripts": {
@@ -17,11 +17,29 @@
       "main.js",
       "preload.js",
       "index.html",
-      "package.json"
-    ]
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "geelywins",
+        "repo": "master-admin"
+      }
+    ],
+    "nsis": {
+      "artifactName": "WA-Hub-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "artifactName": "WA-Hub-${version}.${ext}"
+    }
   },
   "devDependencies": {
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
   }
 }

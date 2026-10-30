@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, session, shell } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 
 // Hanya satu jendela aplikasi
 if (!app.requestSingleInstanceLock()) {
@@ -95,7 +96,27 @@ ipcMain.handle('ai-suggest', async (_e, { apiKey, context }) => {
   }
 });
 
-app.whenReady().then(createWindow);
+// ---- Update otomatis (Windows). Mac butuh aplikasi bertanda tangan, jadi install manual. ----
+function setupUpdater() {
+  if (!app.isPackaged || process.platform !== 'win32') return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('update-downloaded', (info) => {
+    if (win && !win.isDestroyed()) win.webContents.send('update-ready', info.version);
+  });
+  autoUpdater.on('error', () => {});
+  const check = () => autoUpdater.checkForUpdates().catch(() => {});
+  setTimeout(check, 8000);
+  setInterval(check, 6 * 60 * 60 * 1000);
+}
+
+ipcMain.handle('app-version', () => app.getVersion());
+ipcMain.handle('install-update', () => { autoUpdater.quitAndInstall(); });
+
+app.whenReady().then(() => {
+  createWindow();
+  setupUpdater();
+});
 
 app.on('window-all-closed', () => {
   app.quit();

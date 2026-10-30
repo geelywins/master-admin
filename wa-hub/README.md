@@ -36,6 +36,12 @@ Hasilnya ada di folder `dist/` (WA Hub Setup 1.0.0.exe).
 - Kedua fitur hanya mengisi kotak ketik. Pesan terkirim hanya kalau Anda menekan kirim sendiri.
 - Pembacaan chat terakhir bergantung pada struktur halaman WhatsApp Web, jadi bisa berhenti bekerja kalau WhatsApp mengubah tampilannya.
 
+## Update otomatis
+
+- Di Windows, aplikasi mengecek Releases saat dibuka dan tiap 6 jam. Versi baru diunduh sendiri, lalu muncul tombol "Mulai ulang dan pasang" di sidebar. Kalau tidak diklik, update terpasang saat aplikasi ditutup.
+- Di Mac, update otomatis tidak aktif (aplikasi belum bertanda tangan Apple). Install manual dari Releases.
+- Setiap pembaruan harus menaikkan angka `version` di `package.json`, kalau tidak aplikasi menganggap tidak ada versi baru.
+
 ## Catatan
 
 - Satu nomor WhatsApp bisa tertaut ke maksimal 4 perangkat tambahan, jadi aman dipakai bersama WhatsApp Web lain.
