@@ -1,0 +1,27 @@
+{
+  "name": "wa-hub",
+  "version": "1.0.0",
+  "description": "Gabungkan banyak akun WhatsApp Web dalam satu aplikasi",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.wins.wahub",
+    "productName": "WA Hub",
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "package.json"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

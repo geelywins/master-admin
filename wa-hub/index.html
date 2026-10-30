@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>WA Hub</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: Segoe UI, system-ui, sans-serif; background: #111b21; color: #e9edef; overflow: hidden; }
+  #app { display: flex; height: 100%; }
+
+  #sidebar { width: 230px; background: #202c33; display: flex; flex-direction: column; border-right: 1px solid #2a3942; }
+  #sidebar h1 { font-size: 15px; padding: 14px 16px; color: #25d366; letter-spacing: .5px; }
+  #list { flex: 1; overflow-y: auto; }
+
+  .acc { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-left: 3px solid transparent; position: relative; }
+  .acc:hover { background: #2a3942; }
+  .acc.active { background: #2a3942; border-left-color: #25d366; }
+  .dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .name { flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { background: #25d366; color: #111b21; font-size: 11px; font-weight: 700; border-radius: 10px; padding: 1px 7px; display: none; }
+  .badge.show { display: inline-block; }
+  .tools { display: none; gap: 4px; }
+  .acc:hover .tools { display: flex; }
+  .acc:hover .badge { display: none; }
+  .tools button { background: #111b21; border: none; color: #aebac1; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .tools button:hover { color: #fff; background: #374a54; }
+
+  #add { margin: 10px; padding: 10px; border: 1px dashed #4a5c66; background: transparent; color: #25d366; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  #add:hover { background: #2a3942; }
+  .hint { font-size: 11px; color: #667781; padding: 0 14px 12px; }
+
+  #content { flex: 1; position: relative; background: #0b141a; }
+  webview { position: absolute; inset: 0; width: 100%; height: 100%; visibility: hidden; }
+  webview.active { visibility: visible; z-index: 2; }
+  #empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #667781; line-height: 1.7; }
+  #empty b { color: #e9edef; font-size: 18px; }
+
+  #modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; place-items: center; z-index: 10; }
+  #modal.show { display: grid; }
+  #box { background: #202c33; padding: 22px; border-radius: 10px; width: 320px; }
+  #box h3 { font-size: 15px; margin-bottom: 12px; }
+  #box input[type=text] { width: 100%; padding: 9px 10px; border-radius: 6px; border: 1px solid #374a54; background: #111b21; color: #e9edef; font-size: 14px; outline: none; }
+  #box input[type=text]:focus { border-color: #25d366; }
+  #colors { display: flex; gap: 8px; margin: 14px 0; }
+  #colors span { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+  #colors span.sel { border-color: #fff; }
+  #btns { display: flex; justify-content: flex-end; gap: 8px; }
+  #btns button { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; }
+  #cancel { background: #374a54; color: #e9edef; }
+  #ok { background: #25d366; color: #111b21; font-weight: 600; }
+
+  #panel { width: 290px; background: #202c33; border-left: 1px solid #2a3942; display: flex; flex-direction: column; position: relative; }
+  #ptabs { display: flex; }
+  #ptabs button { flex: 1; padding: 12px 0; background: transparent; border: none; border-bottom: 2px solid transparent; color: #aebac1; cursor: pointer; font-size: 13px; }
+  #ptabs button.on { color: #25d366; border-bottom-color: #25d366; }
+  .pane { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .tpl { display: flex; align-items: stretch; gap: 4px; }
+  .tpl .t { flex: 1; text-align: left; background: #111b21; border: 1px solid #2a3942; color: #e9edef; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 13px; }
+  .tpl .t:hover { border-color: #25d366; }
+  .tpl .t small { display: block; color: #8696a0; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tpl .x { background: #111b21; border: 1px solid #2a3942; color: #8696a0; border-radius: 6px; width: 28px; cursor: pointer; }
+  .tpl .x:hover { color: #fff; }
+  .pane input[type=text], .pane input[type=password], .pane textarea { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #374a54; background: #111b21; color: #e9edef; font-size: 13px; font-family: inherit; outline: none; }
+  .pane textarea { min-height: 90px; resize: vertical; }
+  .pane input:focus, .pane textarea:focus { border-color: #25d366; }
+  .pbtn { padding: 9px; border: none; border-radius: 6px; background: #25d366; color: #111b21; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .pbtn.sec { background: #374a54; color: #e9edef; }
+  .pbtn:disabled { opacity: .5; cursor: default; }
+  .note { font-size: 11px; color: #8696a0; line-height: 1.5; }
+  #toast { position: absolute; left: 12px; right: 12px; bottom: 12px; background: #111b21; border: 1px solid #25d366; color: #e9edef; padding: 8px 10px; border-radius: 6px; font-size: 12px; display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h1>WA HUB</h1>
+    <div id="list"></div>
+    <button id="add">+ Tambah akun</button>
+    <div class="hint">Ctrl+1…9 pindah akun<br>Ctrl+R muat ulang akun aktif</div>
+  </div>
+  <div id="content">
+    <div id="empty"><div><b>Belum ada akun</b><br>Klik “+ Tambah akun”, lalu scan QR<br>dari WhatsApp di HP Anda.</div></div>
+  </div>
+  <aside id="panel">
+    <div id="ptabs"><button id="tab-tpl" class="on">Template</button><button id="tab-ai">Saran AI</button></div>
+    <div class="pane" id="pane-tpl">
+      <div id="tpls"></div>
+      <input type="text" id="tt" placeholder="Judul template" maxlength="30">
+      <textarea id="tx" placeholder="Isi pesan"></textarea>
+      <button class="pbtn sec" id="tadd">Simpan template</button>
+      <div class="note">Klik template untuk mengisi kotak chat akun yang sedang terbuka. Pesan tidak terkirim sebelum Anda menekan kirim.</div>
+    </div>
+    <div class="pane" id="pane-ai" style="display:none">
+      <input type="password" id="akey" placeholder="API key Anthropic">
+      <button class="pbtn sec" id="asave">Simpan key</button>
+      <button class="pbtn" id="agen">Buat saran dari chat terakhir</button>
+      <textarea id="aout" placeholder="Saran balasan muncul di sini, boleh Anda edit"></textarea>
+      <button class="pbtn" id="ains">Masukkan ke kotak chat</button>
+      <div class="note">Saat dipakai, beberapa pesan terakhir dari chat yang terbuka dikirim ke Anthropic untuk membuat draf. Key disimpan hanya di komputer ini. Cek isi draf sebelum mengirim.</div>
+    </div>
+    <div id="toast"></div>
+  </aside>
+</div>
+
+<div id="modal">
+  <div id="box">
+    <h3 id="mtitle">Tambah akun</h3>
+    <input type="text" id="minput" placeholder="Nama, mis. WA Pribadi / WA Sales" maxlength="30">
+    <div id="colors"></div>
+    <div id="btns"><button id="cancel">Batal</button><button id="ok">Simpan</button></div>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#128c7e', '#3b82f6', '#a855f7', '#ef4444', '#f59e0b', '#ec4899', '#14b8a6', '#6366f1'];
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+const KEY = 'wa-hub-accounts';
+
+let accounts = [];
+let activeId = null;
+const unread = {};
+
+function load() {
+  try { accounts = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { accounts = []; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(accounts)); } catch (e) {}
+}
+
+const $list = document.getElementById('list');
+const $content = document.getElementById('content');
+const $empty = document.getElementById('empty');
+
+function initials(name) {
+  const p = name.trim().split(/\s+/);
+  return ((p[0] || '?')[0] + (p[1] ? p[1][0] : '')).toUpperCase();
+}
+
+function makeWebview(acc) {
+  const wv = document.createElement('webview');
+  wv.id = 'wv-' + acc.id;
+  wv.setAttribute('src', 'https://web.whatsapp.com/');
+  wv.setAttribute('partition', 'persist:wa-' + acc.id);
+  wv.setAttribute('useragent', UA);
+  wv.addEventListener('page-title-updated', (e) => {
+    const m = /^\((\d+)\)/.exec(e.title || '');
+    unread[acc.id] = m ? parseInt(m[1], 10) : 0;
+    renderList();
+  });
+  $content.appendChild(wv);
+}
+
+function renderList() {
+  $list.innerHTML = '';
+  accounts.forEach((acc, i) => {
+    const el = document.createElement('div');
+    el.className = 'acc' + (acc.id === activeId ? ' active' : '');
+    const n = unread[acc.id] || 0;
+    el.innerHTML =
+      '<div class="dot" style="background:' + acc.color + '"></div>' +
+      '<div class="name"></div>' +
+      '<span class="badge' + (n ? ' show' : '') + '">' + (n > 99 ? '99+' : n) + '</span>' +
+      '<div class="tools"><button data-a="rename" title="Ganti nama">✎</button>' +
+      '<button data-a="reload" title="Muat ulang">⟳</button>' +
+      '<button data-a="del" title="Hapus akun">✕</button></div>';
+    el.querySelector('.dot').textContent = initials(acc.name);
+    el.querySelector('.name').textContent = acc.name;
+    el.addEventListener('click', (ev) => {
+      const a = ev.target.getAttribute && ev.target.getAttribute('data-a');
+      if (a === 'rename') return openModal(acc);
+      if (a === 'reload') return reloadAcc(acc.id);
+      if (a === 'del') return removeAcc(acc);
+      select(acc.id);
+    });
+    $list.appendChild(el);
+  });
+  const total = Object.values(unread).reduce((a, b) => a + b, 0);
+  document.title = total ? '(' + total + ') WA Hub' : 'WA Hub';
+}
+
+function select(id) {
+  activeId = id;
+  document.querySelectorAll('webview').forEach((w) => {
+    w.classList.toggle('active', w.id === 'wv-' + id);
+  });
+  $empty.style.display = id ? 'none' : 'grid';
+  renderList();
+  const wv = document.getElementById('wv-' + id);
+  if (wv) { try { wv.focus(); } catch (e) {} }
+}
+
+function reloadAcc(id) {
+  const wv = document.getElementById('wv-' + id);
+  if (wv && wv.reload) wv.reload();
+}
+
+async function removeAcc(acc) {
+  if (!confirm('Hapus akun "' + acc.name + '"? Sesi login WhatsApp Web di aplikasi ini ikut terhapus (WhatsApp di HP tidak terpengaruh).')) return;
+  const wv = document.getElementById('wv-' + acc.id);
+  if (wv) wv.remove();
+  await window.hub.clearSession('persist:wa-' + acc.id);
+  accounts = accounts.filter((a) => a.id !== acc.id);
+  delete unread[acc.id];
+  save();
+  select(accounts.length ? accounts[0].id : null);
+}
+
+// ---- Modal tambah / ganti nama ----
+const $modal = document.getElementById('modal');
+const $input = document.getElementById('minput');
+const $colors = document.getElementById('colors');
+let editing = null;
+let pickedColor = COLORS[0];
+
+function drawColors() {
+  $colors.innerHTML = '';
+  COLORS.forEach((c) => {
+    const s = document.createElement('span');
+    s.style.background = c;
+    if (c === pickedColor) s.className = 'sel';
+    s.onclick = () => { pickedColor = c; drawColors(); };
+    $colors.appendChild(s);
+  });
+}
+
+function openModal(acc) {
+  editing = acc || null;
+  document.getElementById('mtitle').textContent = acc ? 'Ganti nama akun' : 'Tambah akun';
+  $input.value = acc ? acc.name : '';
+  pickedColor = acc ? acc.color : COLORS[accounts.length % COLORS.length];
+  drawColors();
+  $modal.classList.add('show');
+  setTimeout(() => $input.focus(), 30);
+}
+function closeModal() { $modal.classList.remove('show'); }
+
+function submit() {
+  const name = $input.value.trim();
+  if (!name) return;
+  if (editing) {
+    editing.name = name;
+    editing.color = pickedColor;
+    save();
+    renderList();
+  } else {
+    const acc = { id: Date.now().toString(36), name: name, color: pickedColor };
+    accounts.push(acc);
+    save();
+    makeWebview(acc);
+    select(acc.id);
+  }
+  closeModal();
+}
+
+document.getElementById('add').onclick = () => openModal(null);
+document.getElementById('cancel').onclick = closeModal;
+document.getElementById('ok').onclick = submit;
+$input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') submit();
+  if (e.key === 'Escape') closeModal();
+});
+
+// ---- Pintasan keyboard ----
+window.addEventListener('keydown', (e) => {
+  if (!e.ctrlKey || $modal.classList.contains('show')) return;
+  if (e.key >= '1' && e.key <= '9') {
+    const acc = accounts[parseInt(e.key, 10) - 1];
+    if (acc) { e.preventDefault(); select(acc.id); }
+  } else if (e.key.toLowerCase() === 'r' && activeId) {
+    e.preventDefault();
+    reloadAcc(activeId);
+  }
+});
+
+// ---- Panel template & saran AI (tidak pernah mengirim pesan otomatis) ----
+const TPL_KEY = 'wa-hub-templates';
+const AI_KEY = 'wa-hub-ai-key';
+const DEFAULT_TPLS = [
+  { t: 'Salam pembuka', x: 'Selamat datang, terima kasih sudah menghubungi kami. Ada yang bisa kami bantu?' },
+  { t: 'Mohon ditunggu', x: 'Baik, mohon ditunggu sebentar ya, kami cek dulu informasinya.' },
+  { t: 'Minta data', x: 'Boleh dibantu nama lengkap dan nomor yang bisa dihubungi?' },
+  { t: 'Terima kasih', x: 'Terima kasih sudah menghubungi kami. Kabari kami kalau ada yang ingin ditanyakan lagi.' }
+];
+let tpls = [];
+
+function loadTpls() {
+  try { tpls = JSON.parse(localStorage.getItem(TPL_KEY)); } catch (e) { tpls = null; }
+  if (!Array.isArray(tpls)) tpls = DEFAULT_TPLS.slice();
+}
+function saveTpls() {
+  try { localStorage.setItem(TPL_KEY, JSON.stringify(tpls)); } catch (e) {}
+}
+
+const $toast = document.getElementById('toast');
+let toastTimer;
+function toast(msg) {
+  $toast.textContent = msg;
+  $toast.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $toast.style.display = 'none'; }, 3500);
+}
+
+function activeWebview() {
+  return activeId ? document.getElementById('wv-' + activeId) : null;
+}
+
+// Mengisi kotak ketik WhatsApp saja. Tombol kirim tidak ditekan.
+async function insertIntoChat(text) {
+  const wv = activeWebview();
+  if (!wv) return toast('Pilih akun dulu.');
+  const code = '(function(){var el=document.querySelector(\'footer div[contenteditable="true"]\');' +
+    'if(!el)return false;el.focus();document.execCommand("insertText",false,' + JSON.stringify(text) + ');return true;})()';
+  try {
+    const ok = await wv.executeJavaScript(code);
+    toast(ok ? 'Sudah masuk ke kotak chat. Periksa lalu kirim sendiri.' : 'Buka dulu sebuah chat, lalu coba lagi.');
+  } catch (e) {
+    toast('Gagal mengisi kotak chat.');
+  }
+}
+
+async function readLastMessages() {
+  const wv = activeWebview();
+  if (!wv) return '';
+  const code = '(function(){var n=document.querySelectorAll("div.message-in, div.message-out");' +
+    'var out=[];for(var i=Math.max(0,n.length-6);i<n.length;i++){var s=n[i].querySelector("span.selectable-text");' +
+    'if(s&&s.innerText){out.push((n[i].classList.contains("message-in")?"Pelanggan: ":"Kami: ")+s.innerText);}}' +
+    'return out.join("\\n");})()';
+  try { return await wv.executeJavaScript(code); } catch (e) { return ''; }
+}
+
+function renderTpls() {
+  const box = document.getElementById('tpls');
+  box.innerHTML = '';
+  tpls.forEach((tp, i) => {
+    const row = document.createElement('div');
+    row.className = 'tpl';
+    const b = document.createElement('button');
+    b.className = 't';
+    b.textContent = tp.t;
+    const sm = document.createElement('small');
+    sm.textContent = tp.x;
+    b.appendChild(sm);
+    b.onclick = () => insertIntoChat(tp.x);
+    const x = document.createElement('button');
+    x.className = 'x';
+    x.textContent = '✕';
+    x.title = 'Hapus template';
+    x.onclick = () => { tpls.splice(i, 1); saveTpls(); renderTpls(); };
+    row.appendChild(b);
+    row.appendChild(x);
+    box.appendChild(row);
+    row.style.marginBottom = '6px';
+  });
+}
+
+function initPanel() {
+  loadTpls();
+  renderTpls();
+  const tabTpl = document.getElementById('tab-tpl');
+  const tabAi = document.getElementById('tab-ai');
+  function showTab(ai) {
+    tabTpl.classList.toggle('on', !ai);
+    tabAi.classList.toggle('on', ai);
+    document.getElementById('pane-tpl').style.display = ai ? 'none' : 'flex';
+    document.getElementById('pane-ai').style.display = ai ? 'flex' : 'none';
+  }
+  tabTpl.onclick = () => showTab(false);
+  tabAi.onclick = () => showTab(true);
+
+  document.getElementById('tadd').onclick = () => {
+    const t = document.getElementById('tt').value.trim();
+    const x = document.getElementById('tx').value.trim();
+    if (!t || !x) return toast('Isi judul dan pesan dulu.');
+    tpls.push({ t: t, x: x });
+    saveTpls();
+    renderTpls();
+    document.getElementById('tt').value = '';
+    document.getElementById('tx').value = '';
+  };
+
+  const $key = document.getElementById('akey');
+  try { $key.value = localStorage.getItem(AI_KEY) || ''; } catch (e) {}
+  document.getElementById('asave').onclick = () => {
+    try { localStorage.setItem(AI_KEY, $key.value.trim()); toast('Key tersimpan.'); } catch (e) { toast('Gagal menyimpan key.'); }
+  };
+
+  const $gen = document.getElementById('agen');
+  $gen.onclick = async () => {
+    const key = $key.value.trim();
+    if (!key) return toast('Isi API key dulu.');
+    const ctx = await readLastMessages();
+    if (!ctx) return toast('Chat tidak terbaca. Buka sebuah chat dulu.');
+    $gen.disabled = true;
+    $gen.textContent = 'Membuat saran...';
+    const r = await window.hub.suggest(key, ctx);
+    $gen.disabled = false;
+    $gen.textContent = 'Buat saran dari chat terakhir';
+    if (r.error) return toast(r.error);
+    document.getElementById('aout').value = r.text;
+  };
+
+  document.getElementById('ains').onclick = () => {
+    const t = document.getElementById('aout').value.trim();
+    if (!t) return toast('Belum ada saran.');
+    insertIntoChat(t);
+  };
+}
+
+// ---- Mulai ----
+initPanel();
+load();
+accounts.forEach(makeWebview);
+renderList();
+select(accounts.length ? accounts[0].id : null);
+</script>
+</body>
+</html>
