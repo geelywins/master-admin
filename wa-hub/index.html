@@ -75,6 +75,12 @@
   .pbtn.sec { background: #374a54; color: #e9edef; }
   .pbtn:disabled { opacity: .5; cursor: default; }
   .note { font-size: 11px; color: #8696a0; line-height: 1.5; }
+  .tools button svg { width: 14px; height: 14px; pointer-events: none; display: block; margin: 0 auto; }
+  .hhead { display: flex; align-items: center; gap: 8px; padding: 9px 14px; margin-top: 6px; border-top: 1px solid #2a3942; color: #8696a0; font-size: 12px; cursor: pointer; }
+  .hhead:hover { color: #e9edef; }
+  .hhead .hl { flex: 1; }
+  .acc.hid { opacity: .8; }
+  .nomatch { font-size: 12px; color: #8696a0; padding: 6px 2px; }
   #toast { position: absolute; left: 12px; right: 12px; bottom: 12px; background: #111b21; border: 1px solid #25d366; color: #e9edef; padding: 8px 10px; border-radius: 6px; font-size: 12px; display: none; }
   #upd { display: none; margin: 0 10px 10px; padding: 10px; border: 1px solid #25d366; border-radius: 8px; font-size: 12px; line-height: 1.5; }
   #upd button { margin-top: 8px; width: 100%; padding: 8px; border: none; border-radius: 6px; background: #25d366; color: #111b21; font-weight: 600; cursor: pointer; }
@@ -97,6 +103,7 @@
   <aside id="panel">
     <div id="ptabs"><button id="tab-tpl" class="on">Template</button><button id="tab-ai">Saran AI</button></div>
     <div class="pane" id="pane-tpl">
+      <input type="text" id="tsearch" placeholder="Cari template" aria-label="Cari template">
       <div id="tpls"></div>
       <input type="text" id="tt" placeholder="Judul template" maxlength="30">
       <textarea id="tx" placeholder="Isi pesan"></textarea>
@@ -165,30 +172,70 @@ function makeWebview(acc) {
   $content.appendChild(wv);
 }
 
+const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10.6 10.6 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.1-5.9M9.9 4.2A9.7 9.7 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.2 3.2M1 1l22 22"/></svg>';
+let showHidden = false;
+
+function firstVisibleId() {
+  const v = accounts.filter((a) => !a.hidden);
+  return v.length ? v[0].id : null;
+}
+
+function hideAcc(acc) {
+  acc.hidden = true;
+  save();
+  if (activeId === acc.id) select(firstVisibleId()); else renderList();
+}
+
+function unhideAcc(acc) {
+  acc.hidden = false;
+  save();
+  renderList();
+}
+
+function accRow(acc, hiddenRow) {
+  const el = document.createElement('div');
+  el.className = 'acc' + (acc.id === activeId ? ' active' : '') + (hiddenRow ? ' hid' : '');
+  const n = unread[acc.id] || 0;
+  el.innerHTML =
+    '<div class="dot" style="background:' + acc.color + '"></div>' +
+    '<div class="name"></div>' +
+    '<span class="badge' + (n ? ' show' : '') + '">' + (n > 99 ? '99+' : n) + '</span>' +
+    '<div class="tools"><button data-a="rename" title="Ganti nama">✎</button>' +
+    '<button data-a="reload" title="Muat ulang">⟳</button>' +
+    (hiddenRow
+      ? '<button data-a="unhide" title="Tampilkan kembali di daftar">' + EYE + '</button>'
+      : '<button data-a="hide" title="Sembunyikan dari daftar">' + EYE_OFF + '</button>') +
+    '<button data-a="del" title="Hapus akun">✕</button></div>';
+  el.querySelector('.dot').textContent = initials(acc.name);
+  el.querySelector('.name').textContent = acc.name;
+  el.addEventListener('click', (ev) => {
+    const btn = ev.target.closest ? ev.target.closest('[data-a]') : null;
+    const a = btn ? btn.getAttribute('data-a') : null;
+    if (a === 'rename') return openModal(acc);
+    if (a === 'reload') return reloadAcc(acc.id);
+    if (a === 'hide') return hideAcc(acc);
+    if (a === 'unhide') return unhideAcc(acc);
+    if (a === 'del') return removeAcc(acc);
+    select(acc.id);
+  });
+  return el;
+}
+
 function renderList() {
   $list.innerHTML = '';
-  accounts.forEach((acc, i) => {
-    const el = document.createElement('div');
-    el.className = 'acc' + (acc.id === activeId ? ' active' : '');
-    const n = unread[acc.id] || 0;
-    el.innerHTML =
-      '<div class="dot" style="background:' + acc.color + '"></div>' +
-      '<div class="name"></div>' +
-      '<span class="badge' + (n ? ' show' : '') + '">' + (n > 99 ? '99+' : n) + '</span>' +
-      '<div class="tools"><button data-a="rename" title="Ganti nama">✎</button>' +
-      '<button data-a="reload" title="Muat ulang">⟳</button>' +
-      '<button data-a="del" title="Hapus akun">✕</button></div>';
-    el.querySelector('.dot').textContent = initials(acc.name);
-    el.querySelector('.name').textContent = acc.name;
-    el.addEventListener('click', (ev) => {
-      const a = ev.target.getAttribute && ev.target.getAttribute('data-a');
-      if (a === 'rename') return openModal(acc);
-      if (a === 'reload') return reloadAcc(acc.id);
-      if (a === 'del') return removeAcc(acc);
-      select(acc.id);
-    });
-    $list.appendChild(el);
-  });
+  accounts.filter((a) => !a.hidden).forEach((acc) => $list.appendChild(accRow(acc, false)));
+  const hid = accounts.filter((a) => a.hidden);
+  if (hid.length) {
+    const hn = hid.reduce((sum, a) => sum + (unread[a.id] || 0), 0);
+    const head = document.createElement('div');
+    head.className = 'hhead';
+    head.innerHTML = '<span class="hl"></span><span class="badge' + (hn ? ' show' : '') + '">' + (hn > 99 ? '99+' : hn) + '</span>';
+    head.querySelector('.hl').textContent = (showHidden ? '▾ ' : '▸ ') + 'Tersembunyi (' + hid.length + ')';
+    head.onclick = () => { showHidden = !showHidden; renderList(); };
+    $list.appendChild(head);
+    if (showHidden) hid.forEach((acc) => $list.appendChild(accRow(acc, true)));
+  }
   const total = Object.values(unread).reduce((a, b) => a + b, 0);
   document.title = total ? '(' + total + ') WA Hub' : 'WA Hub';
 }
@@ -217,7 +264,7 @@ async function removeAcc(acc) {
   accounts = accounts.filter((a) => a.id !== acc.id);
   delete unread[acc.id];
   save();
-  select(accounts.length ? accounts[0].id : null);
+  select(firstVisibleId());
 }
 
 // ---- Modal tambah / ganti nama ----
@@ -279,7 +326,7 @@ $input.addEventListener('keydown', (e) => {
 window.addEventListener('keydown', (e) => {
   if (!e.ctrlKey || $modal.classList.contains('show')) return;
   if (e.key >= '1' && e.key <= '9') {
-    const acc = accounts[parseInt(e.key, 10) - 1];
+    const acc = accounts.filter((a) => !a.hidden)[parseInt(e.key, 10) - 1];
     if (acc) { e.preventDefault(); select(acc.id); }
   } else if (e.key.toLowerCase() === 'r' && activeId) {
     e.preventDefault();
@@ -347,7 +394,10 @@ async function readLastMessages() {
 function renderTpls() {
   const box = document.getElementById('tpls');
   box.innerHTML = '';
+  const q = ((document.getElementById('tsearch') || {}).value || '').trim().toLowerCase();
+  let shown = 0;
   tpls.forEach((tp, i) => {
+    if (q && (tp.t + ' ' + tp.x).toLowerCase().indexOf(q) === -1) return;
     const row = document.createElement('div');
     row.className = 'tpl';
     const b = document.createElement('button');
@@ -378,8 +428,15 @@ function renderTpls() {
     row.appendChild(ed);
     row.appendChild(x);
     box.appendChild(row);
+    shown++;
     row.style.marginBottom = '6px';
   });
+  if (!shown) {
+    const none = document.createElement('div');
+    none.className = 'nomatch';
+    none.textContent = tpls.length ? 'Tidak ada template yang cocok.' : 'Belum ada template.';
+    box.appendChild(none);
+  }
 }
 
 function resetTplForm() {
@@ -425,6 +482,7 @@ function initPanel() {
     resetTplForm();
   };
   document.getElementById('tcancel').onclick = resetTplForm;
+  document.getElementById('tsearch').oninput = renderTpls;
 
   const $key = document.getElementById('akey');
   try { $key.value = localStorage.getItem(AI_KEY) || ''; } catch (e) {}
@@ -489,7 +547,7 @@ initHover();
 load();
 accounts.forEach(makeWebview);
 renderList();
-select(accounts.length ? accounts[0].id : null);
+select(firstVisibleId());
 </script>
 </body>
 </html>

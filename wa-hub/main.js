@@ -110,7 +110,9 @@ function setupUpdater() {
   setInterval(check, 6 * 60 * 60 * 1000);
 }
 
-ipcMain.handle('app-version', () => app.getVersion());
+ipcMain.handle('app-version', () => {
+  try { return require('./package.json').displayVersion || app.getVersion(); } catch (e) { return app.getVersion(); }
+});
 ipcMain.handle('install-update', () => { autoUpdater.quitAndInstall(); });
 
 app.whenReady().then(() => {

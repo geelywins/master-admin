@@ -29,10 +29,17 @@ Hasilnya ada di folder `dist/` (WA Hub Setup 1.0.0.exe).
 - Ctrl+1…9 pindah akun, Ctrl+R muat ulang akun aktif
 - Ganti nama / warna akun, hapus akun (sesi ikut terhapus)
 
+## Sembunyikan akun
+
+- Arahkan mouse ke sebuah akun di daftar kiri, klik ikon mata tercoret untuk menyembunyikannya. Pilihan ini tidak otomatis, hanya akun yang Anda pilih.
+- Akun tersembunyi masuk ke bagian "Tersembunyi (n)" di bawah daftar. Klik bagian itu untuk membukanya, lalu klik ikon mata untuk menampilkan akun kembali.
+- Akun tersembunyi tetap berjalan di latar belakang, jadi pesan baru tetap tercatat (angka di "Tersembunyi" menunjukkan jumlah pesan belum dibaca).
+
 ## Panel balasan (kanan)
 
 - Panel tersembunyi supaya WhatsApp lebih lega. Arahkan mouse ke tab hijau di tepi kanan jendela untuk membukanya; panel menutup lagi saat mouse keluar.
 
+- **Cari template**: ketik di kolom "Cari template" untuk menyaring berdasarkan judul atau isi.
 - **Template**: klik untuk mengisi kotak chat akun yang sedang terbuka. Bisa tambah, edit (ikon ✎), dan hapus (ikon ✕) template sendiri.
 - **Saran AI**: isi API key Anthropic sekali, klik "Buat saran dari chat terakhir", edit drafnya, lalu "Masukkan ke kotak chat".
 - Kedua fitur hanya mengisi kotak ketik. Pesan terkirim hanya kalau Anda menekan kirim sendiri.
