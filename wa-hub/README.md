@@ -31,7 +31,9 @@ Hasilnya ada di folder `dist/` (WA Hub Setup 1.0.0.exe).
 
 ## Panel balasan (kanan)
 
-- **Template**: klik untuk mengisi kotak chat akun yang sedang terbuka. Bisa tambah dan hapus template sendiri.
+- Panel tersembunyi supaya WhatsApp lebih lega. Arahkan mouse ke tab hijau di tepi kanan jendela untuk membukanya; panel menutup lagi saat mouse keluar.
+
+- **Template**: klik untuk mengisi kotak chat akun yang sedang terbuka. Bisa tambah, edit (ikon ✎), dan hapus (ikon ✕) template sendiri.
 - **Saran AI**: isi API key Anthropic sekali, klik "Buat saran dari chat terakhir", edit drafnya, lalu "Masukkan ke kotak chat".
 - Kedua fitur hanya mengisi kotak ketik. Pesan terkirim hanya kalau Anda menekan kirim sendiri.
 - Pembacaan chat terakhir bergantung pada struktur halaman WhatsApp Web, jadi bisa berhenti bekerja kalau WhatsApp mengubah tampilannya.
