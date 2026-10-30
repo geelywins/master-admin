@@ -1,7 +1,8 @@
 name: Build WA Hub
 
-# Jalan otomatis saat isi folder wa-hub berubah (termasuk dari Extract ZIP),
-# lalu installer dipasang di halaman Releases ("WA Hub (terbaru)").
+# Jalan otomatis saat isi folder wa-hub berubah (termasuk dari Extract ZIP).
+# Tiap versi (angka "version" di wa-hub/package.json) menjadi satu Release.
+# Aplikasi WA Hub di Windows membaca Release terbaru untuk update otomatis.
 
 on:
   workflow_dispatch:
@@ -9,7 +10,6 @@ on:
     branches: [main]
     paths:
       - 'wa-hub/**'
-      - '.github/workflows/wa-hub.yml'
 
 permissions:
   contents: write
@@ -49,7 +49,9 @@ jobs:
           name: wa-hub-${{ matrix.os }}
           path: |
             wa-hub/dist/*.exe
+            wa-hub/dist/*.blockmap
             wa-hub/dist/*.dmg
+            wa-hub/dist/latest.yml
           if-no-files-found: error
 
   release:
@@ -64,20 +66,23 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Pindahkan tag rilis ke commit ini
+      - name: Baca versi
+        id: v
+        run: echo "version=$(node -p "require('./wa-hub/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Periksa file untuk update otomatis
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -f wa-hub-latest
-          git push -f origin wa-hub-latest
+          ls -la dist
+          test -f dist/latest.yml
 
       - name: Terbitkan Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: wa-hub-latest
-          name: WA Hub (terbaru)
+          tag_name: wa-hub-v${{ steps.v.outputs.version }}
+          name: WA Hub ${{ steps.v.outputs.version }}
+          make_latest: true
           body: |
-            Installer WA Hub terbaru, dibangun otomatis.
-            Windows: file .exe. Mac: file .dmg.
-            Windows akan menampilkan peringatan "publisher tidak dikenal" (installer tidak bertanda tangan): pilih More info, lalu Run anyway.
+            Installer WA Hub versi ${{ steps.v.outputs.version }}, dibangun otomatis.
+            Windows: file .exe (aplikasi yang sudah terpasang akan update sendiri). Mac: file .dmg (install manual).
+            Windows menampilkan peringatan "publisher tidak dikenal" (installer tidak bertanda tangan): pilih More info, lalu Run anyway.
           files: dist/*
