@@ -1,0 +1,83 @@
+name: Build WA Hub
+
+# Jalan otomatis saat isi folder wa-hub berubah (termasuk dari Extract ZIP),
+# lalu installer dipasang di halaman Releases ("WA Hub (terbaru)").
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'wa-hub/**'
+      - '.github/workflows/wa-hub.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            flag: --win
+          - os: macos-latest
+            flag: --mac
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: wa-hub
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npx electron-builder ${{ matrix.flag }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Simpan hasil build
+        uses: actions/upload-artifact@v4
+        with:
+          name: wa-hub-${{ matrix.os }}
+          path: |
+            wa-hub/dist/*.exe
+            wa-hub/dist/*.dmg
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ambil hasil build
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Pindahkan tag rilis ke commit ini
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f wa-hub-latest
+          git push -f origin wa-hub-latest
+
+      - name: Terbitkan Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: wa-hub-latest
+          name: WA Hub (terbaru)
+          body: |
+            Installer WA Hub terbaru, dibangun otomatis.
+            Windows: file .exe. Mac: file .dmg.
+            Windows akan menampilkan peringatan "publisher tidak dikenal" (installer tidak bertanda tangan): pilih More info, lalu Run anyway.
+          files: dist/*
